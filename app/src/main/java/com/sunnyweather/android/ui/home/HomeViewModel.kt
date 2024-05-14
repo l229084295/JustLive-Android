@@ -2,8 +2,8 @@ package com.sunnyweather.android.ui.home
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.switchMap
 import com.drake.statelayout.StateLayout
 import com.sunnyweather.android.logic.Repository
 import com.sunnyweather.android.logic.model.RoomInfo
@@ -15,7 +15,7 @@ class HomeViewModel(val platform: String) : ViewModel() {
     private var page = 0
 
     val roomList = ArrayList<RoomInfo>()
-    val roomListLiveDate = Transformations.switchMap(pageLiveData) {
+    val roomListLiveDate = pageLiveData.switchMap {
             value -> getRecommendSelect(value.platform, value.areaType, value.area, value.page, value.size)
     }
 

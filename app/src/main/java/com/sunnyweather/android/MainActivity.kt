@@ -38,9 +38,10 @@ import com.sunnyweather.android.ui.login.LoginViewModel
 import com.sunnyweather.android.ui.search.SearchActivity
 import com.sunnyweather.android.ui.setting.SettingActivity
 import com.umeng.analytics.MobclickAgent
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.dialog_donate.*
-import kotlinx.android.synthetic.main.dialog_update.*
+import com.sunnyweather.android.R
+import com.sunnyweather.android.databinding.ActivityMainBinding
+import com.sunnyweather.android.databinding.DialogDonateBinding
+import com.sunnyweather.android.databinding.DialogUpdateBinding
 import moe.feng.alipay.zerosdk.AlipayZeroSdk
 
 
@@ -55,9 +56,11 @@ class MainActivity : AppCompatActivity(), AreaSingleFragment.FragmentListener {
     private var pureDark = false
     private var mShortcutManager:ShortcutManager? = null
     private var activityMain = this
+    lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
         //颜色主题
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         autoDark = sharedPreferences.getBoolean("autoDark", true)
@@ -78,12 +81,13 @@ class MainActivity : AppCompatActivity(), AreaSingleFragment.FragmentListener {
         } else {
             setTheme(themeActived)
         }
-        setContentView(R.layout.activity_main)
-        drawer_dark_switch.isChecked = (themeActived == R.style.nightTheme)
-        BarUtils.addMarginTopEqualStatusBarHeight(drawer_nick)
+        setContentView(binding.root)
+
+        binding.drawerDarkSwitch.isChecked = (themeActived == R.style.nightTheme)
+        BarUtils.addMarginTopEqualStatusBarHeight(binding.drawerNick)
         BarUtils.transparentStatusBar(this)
         BarUtils.setStatusBarLightMode(this, themeActived != R.style.nightTheme)
-        setSupportActionBar(main_toolBar)
+        setSupportActionBar(binding.mainToolBar)
         initLogin()
         areaPopup = AreaPopup(this, this)
         supportActionBar?.let {
@@ -93,79 +97,80 @@ class MainActivity : AppCompatActivity(), AreaSingleFragment.FragmentListener {
         }
 
         //Drawer
-        drawer_dark_switch.setOnCheckedChangeListener { _, isChecked ->
+        binding.drawerDarkSwitch.setOnCheckedChangeListener { _, isChecked ->
             if(isChecked){
                 sharedPreferences.edit().putInt("theme", R.style.nightTheme).commit()
-                drawer_dark_switch.isChecked = true
+                binding.drawerDarkSwitch.isChecked = true
             } else {
                 sharedPreferences.edit().putInt("theme", R.style.SunnyWeather).commit()
-                drawer_dark_switch.isChecked = false
+                binding.drawerDarkSwitch.isChecked = false
             }
             recreate()
         }
-        drawer_dark_switch.setOnClickListener {
+        binding.drawerDarkSwitch.setOnClickListener {
             sharedPreferences.edit().putBoolean("autoDark",false).commit()
         }
-        drawer_logout.setOnClickListener {
+        binding.drawerLogout.setOnClickListener {
             SunnyWeatherApplication.clearLoginInfo(this)
-            main_fragment.currentItem = 0
+            binding.mainFragment.currentItem = 0
         }
-        drawer_login.setOnClickListener {
+        binding.drawerLogin.setOnClickListener {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
         }
-        drawer_setting.setOnClickListener {
+        binding.drawerSetting.setOnClickListener {
             val intent = Intent(this, SettingActivity::class.java)
             startActivity(intent)
         }
-        drawer_support.setOnClickListener {
+        binding.drawerSupport.setOnClickListener {
             MaterialDialog(this).show {
-                customView(R.layout.dialog_donate)
+                val dialogBinding = DialogDonateBinding.inflate(layoutInflater)
+                customView(view = dialogBinding.root)
                 var payPlatform = "zfb"
-                donate_cancel.setOnClickListener {
+                dialogBinding.donateCancel.setOnClickListener {
                     dismiss()
                 }
-                donate_save_cancel.setOnClickListener {
-                    donate_contain.visibility = View.VISIBLE
-                    donate_pic_contain.visibility = View.GONE
+                dialogBinding.donateSaveCancel.setOnClickListener {
+                    dialogBinding.donateContain.visibility = View.VISIBLE
+                    dialogBinding.donatePicContain.visibility = View.GONE
                 }
-                donate_zfb.setOnClickListener {
+                dialogBinding.donateZfb.setOnClickListener {
                     if (AlipayZeroSdk.hasInstalledAlipayClient(context)) {
                         AlipayZeroSdk.startAlipayClient(activityMain, "fkx19479mrxqi6tzhgw0bd0")
                     } else {
                         payPlatform = "zfb"
-                        donate_pic.setImageDrawable(resources.getDrawable(R.drawable.zfb_pic))
-                        donate_contain.visibility = View.GONE
-                        donate_pic_contain.visibility = View.VISIBLE
-                        donate_save_zfb.visibility = View.VISIBLE
-                        donate_save_wx.visibility = View.INVISIBLE
+                        dialogBinding.donatePic.setImageDrawable(resources.getDrawable(R.drawable.zfb_pic))
+                        dialogBinding.donateContain.visibility = View.GONE
+                        dialogBinding.donatePicContain.visibility = View.VISIBLE
+                        dialogBinding.donateSaveZfb.visibility = View.VISIBLE
+                        dialogBinding.donateSaveWx.visibility = View.INVISIBLE
                     }
                 }
-                donate_wx.setOnClickListener {
+                dialogBinding.donateWx.setOnClickListener {
                     payPlatform = "wx"
-                    donate_pic.setImageDrawable(resources.getDrawable(R.drawable.wx_pic))
-                    donate_contain.visibility = View.GONE
-                    donate_pic_contain.visibility = View.VISIBLE
-                    donate_save_zfb.visibility = View.INVISIBLE
-                    donate_save_wx.visibility = View.VISIBLE
+                    dialogBinding.donatePic.setImageDrawable(resources.getDrawable(R.drawable.wx_pic))
+                    dialogBinding.donateContain.visibility = View.GONE
+                    dialogBinding.donatePicContain.visibility = View.VISIBLE
+                    dialogBinding.donateSaveZfb.visibility = View.INVISIBLE
+                    dialogBinding.donateSaveWx.visibility = View.VISIBLE
                 }
-                donate_save_zfb.setOnClickListener {
+                dialogBinding.donateSaveZfb.setOnClickListener {
                     ImageUtils.save2Album(ImageUtils.drawable2Bitmap(resources.getDrawable(R.drawable.zfb_pic)),Bitmap.CompressFormat.JPEG)
                     ToastUtils.showLong("二维码已保存到相册,请打开支付宝扫码使用")
                 }
-                donate_save_wx.setOnClickListener {
+                dialogBinding.donateSaveWx.setOnClickListener {
                     ImageUtils.save2Album(ImageUtils.drawable2Bitmap(resources.getDrawable(R.drawable.wx_pic)),Bitmap.CompressFormat.JPEG)
                     ToastUtils.showLong("二维码已保存到相册,请打开微信扫码使用")
                 }
             }
         }
-        drawer_report.setOnClickListener {
+        binding.drawerReport.setOnClickListener {
             val intent = Intent(this, AboutActvity::class.java)
             startActivity(intent)
         }
 
         //ViewPager2
-        viewPager = main_fragment
+        viewPager = binding.mainFragment
         viewPager.isUserInputEnabled = false
         val pagerAdapter = ScreenSlidePagerAdapter(this)
         viewPager.adapter = pagerAdapter
@@ -194,21 +199,22 @@ class MainActivity : AppCompatActivity(), AreaSingleFragment.FragmentListener {
                 }
                 val dialogContent = Html.fromHtml("<div>$descriptions</div>")
                 MaterialDialog(this).show {
-                    customView(R.layout.dialog_update)
-                    update_description.text = dialogContent
-                    update_version.text = "版本: ${updateInfo.latestVersion}"
-                    update_size.text = "下载体积: ${updateInfo.apkSize}"
-                    ignore_btn.setOnClickListener {
+                    val dialogBinding = DialogUpdateBinding.inflate(layoutInflater)
+                    customView(view = dialogBinding.root)
+                    dialogBinding.updateDescription.text = dialogContent
+                    dialogBinding.updateVersion.text = "版本: ${updateInfo.latestVersion}"
+                    dialogBinding.updateSize.text = "下载体积: ${updateInfo.apkSize}"
+                    dialogBinding.ignoreBtn.setOnClickListener {
                         var sharedPref =
                             context.getSharedPreferences("JustLive", Context.MODE_PRIVATE)
                         sharedPref.edit().putInt("ignoreVersion", updateInfo.versionNum).commit()
                         Toast.makeText(context, "已忽略", Toast.LENGTH_SHORT).show()
                         cancel()
                     }
-                    versionchecklib_version_dialog_cancel.setOnClickListener {
+                    dialogBinding.versionchecklibVersionDialogCancel.setOnClickListener {
                         dismiss()
                     }
-                    versionchecklib_version_dialog_commit.setOnClickListener {
+                    dialogBinding.versionchecklibVersionDialogCommit.setOnClickListener {
                         val uri = Uri.parse(updateInfo.updateUrl)
                         val intent = Intent(Intent.ACTION_VIEW, uri)
                         intent.addCategory(Intent.CATEGORY_BROWSABLE)
@@ -216,7 +222,7 @@ class MainActivity : AppCompatActivity(), AreaSingleFragment.FragmentListener {
                         startActivity(intent)
                     }
                     if (isVersionCheck) {
-                        ignore_btn.visibility = View.GONE
+                        dialogBinding.ignoreBtn.visibility = View.GONE
                     }
                 }
             } else if (updateInfo is String) {
@@ -230,22 +236,22 @@ class MainActivity : AppCompatActivity(), AreaSingleFragment.FragmentListener {
                     0 -> {
                         val title = SunnyWeatherApplication.areaName.value
                         if (title == "all" || title == null) {
-                            main_toolBar_title.text = "全部推荐"
+                            binding.mainToolBarTitle.text = "全部推荐"
                         } else {
-                            main_toolBar_title.text = title
+                            binding.mainToolBarTitle.text = title
                         }
                         val drawable = getDrawable(R.drawable.icon_arrow_down)
-                        main_toolBar_title.setCompoundDrawablesWithIntrinsicBounds(null, null, drawable, null)
+                        binding.mainToolBarTitle.setCompoundDrawablesWithIntrinsicBounds(null, null, drawable, null)
                     }
                     1 -> {
-                        main_toolBar_title.text = "关注"
-                        main_toolBar_title.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
+                        binding.mainToolBarTitle.text = "关注"
+                        binding.mainToolBarTitle.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
                     }
                 }
             }
         })
         //tabLayout
-        ViewPager2Delegate.install(viewPager, tab_main)
+        ViewPager2Delegate.install(viewPager, binding.tabMain)
 
         //启动页
         val startPage = sharedPreferences.getString("start_page", "0")
@@ -253,7 +259,7 @@ class MainActivity : AppCompatActivity(), AreaSingleFragment.FragmentListener {
             viewPager.currentItem = 1
         }
         //标题栏的标题click事件
-        main_toolBar_title.setOnClickListener {
+        binding.mainToolBarTitle.setOnClickListener {
             areaPopup = AreaPopup(this, this)
             XPopup.Builder(this)
                 .isDestroyOnDismiss(true)
@@ -274,7 +280,7 @@ class MainActivity : AppCompatActivity(), AreaSingleFragment.FragmentListener {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val newTheme = sharedPreferences.getInt("theme", R.style.SunnyWeather)
         val newPureDark = sharedPreferences.getBoolean("pureDark", false)
-        drawer_dark_switch.isChecked = (themeActived == R.style.nightTheme)
+        binding.drawerDarkSwitch.isChecked = (themeActived == R.style.nightTheme)
         if (newTheme != themeActived || newPureDark != pureDark){
             recreate()
         }
@@ -287,15 +293,15 @@ class MainActivity : AppCompatActivity(), AreaSingleFragment.FragmentListener {
         mMenu = menu
         SunnyWeatherApplication.isLogin.observe(this, {result ->
             if (result) {
-                drawer_nick.text = SunnyWeatherApplication.userInfo?.nickName
-                drawer_username.text = SunnyWeatherApplication.userInfo?.userName
-                drawer_logout.visibility = View.VISIBLE
-                drawer_login.visibility = View.INVISIBLE
+                binding.drawerNick.text = SunnyWeatherApplication.userInfo?.nickName
+                binding.drawerUsername.text = SunnyWeatherApplication.userInfo?.userName
+                binding.drawerLogout.visibility = View.VISIBLE
+                binding.drawerLogin.visibility = View.INVISIBLE
             } else {
-                drawer_nick.text = "未登录"
-                drawer_username.text = ""
-                drawer_logout.visibility = View.INVISIBLE
-                drawer_login.visibility = View.VISIBLE
+                binding.drawerNick.text = "未登录"
+                binding.drawerUsername.text = ""
+                binding.drawerLogout.visibility = View.INVISIBLE
+                binding.drawerLogin.visibility = View.VISIBLE
             }
         })
         return true
@@ -303,7 +309,7 @@ class MainActivity : AppCompatActivity(), AreaSingleFragment.FragmentListener {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            android.R.id.home -> main_drawerLayout.openDrawer(GravityCompat.START)
+            android.R.id.home -> binding.mainDrawerLayout.openDrawer(GravityCompat.START)
             R.id.menu_search -> {
                 val intent = Intent(this, SearchActivity::class.java)
                 startActivity(intent)
@@ -313,7 +319,7 @@ class MainActivity : AppCompatActivity(), AreaSingleFragment.FragmentListener {
     }
 
     override fun onFragment(areaType: String, areaName:String) {
-        main_toolBar_title.text = areaName
+        binding.mainToolBarTitle.text = areaName
         SunnyWeatherApplication.areaType.value = areaType
         SunnyWeatherApplication.areaName.value = if (areaName == "全部推荐") "all" else areaName
         areaPopup.dismiss()

@@ -8,10 +8,10 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.viewholder.BaseViewHolder;
-import com.sunnyweather.android.R;
 import com.sunnyweather.android.SunnyWeatherApplication;
 import com.sunnyweather.android.logic.model.RoomInfo;
 import com.sunnyweather.android.ui.liveRoom.LiveRoomActivity;
+import com.sunnyweather.android.R;
 
 import org.jetbrains.annotations.NotNull;
 

@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 
 import com.sunnyweather.android.R;
 
+
 public class CustomBottomDialog extends Dialog {
 
     public CustomBottomDialog(@NonNull Context context) {

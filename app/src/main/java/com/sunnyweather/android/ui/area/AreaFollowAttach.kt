@@ -16,9 +16,9 @@ import com.drake.brv.utils.linear
 import com.drake.brv.utils.setup
 import com.lxj.xpopup.core.AttachPopupView
 import com.sunnyweather.android.MainActivity
-import com.sunnyweather.android.R
 import com.sunnyweather.android.logic.model.AreaFollow
 import com.sunnyweather.android.ui.roomList.SpaceItemDecoration
+import com.sunnyweather.android.R
 
 class AreaFollowAttach(context: Context) : AttachPopupView(context) {
     private var sharedPref = PreferenceManager.getDefaultSharedPreferences(context)

@@ -15,10 +15,9 @@ import com.alibaba.fastjson.JSONObject
 import com.blankj.utilcode.util.ConvertUtils
 import com.blankj.utilcode.util.ScreenUtils
 import com.blankj.utilcode.util.ToastUtils
-import com.sunnyweather.android.R
 import com.sunnyweather.android.logic.model.AreaFollow
 import com.sunnyweather.android.ui.roomList.SpaceItemDecoration
-import kotlinx.android.synthetic.main.fragment_arealist.*
+import com.sunnyweather.android.databinding.FragmentArealistBinding
 import java.lang.IllegalArgumentException
 
 class AreaSingleFragment(private val areaList: List<JSONObject>) : Fragment() {
@@ -26,14 +25,16 @@ class AreaSingleFragment(private val areaList: List<JSONObject>) : Fragment() {
 
     private lateinit var mFragmentListener: FragmentListener
     private lateinit var sharedPref: SharedPreferences
-
     private lateinit var adapter: AreaListAdapter
+    var binding: FragmentArealistBinding? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_arealist, container, false)
+        binding = FragmentArealistBinding.inflate(layoutInflater)
+        return binding?.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -42,10 +43,12 @@ class AreaSingleFragment(private val areaList: List<JSONObject>) : Fragment() {
         var cardNum = ScreenUtils.getAppScreenWidth()/ ConvertUtils.dp2px(129F)
         if (cardNum < 2) cardNum = 2
         val layoutManager = GridLayoutManager(context, cardNum)
-        recyclerView_area.addItemDecoration(SpaceItemDecoration(10))
-        recyclerView_area.layoutManager = layoutManager
-        adapter = AreaListAdapter(this, areaList)
-        recyclerView_area.adapter = adapter
+        binding?.apply {
+            recyclerViewArea.addItemDecoration(SpaceItemDecoration(10))
+            recyclerViewArea.layoutManager = layoutManager
+            adapter = AreaListAdapter(this@AreaSingleFragment, areaList)
+            recyclerViewArea.adapter = adapter
+        }
     }
 
     fun saveArea(typeName:String, areaName:String) {

@@ -9,10 +9,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.alibaba.fastjson.JSONObject
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.sunnyweather.android.R
 import com.lxj.xpopup.XPopup
 import com.lxj.xpopup.enums.PopupPosition
-
+import com.sunnyweather.android.R
 
 
 class AreaListAdapter(private val fragment: AreaSingleFragment, private val areaList: List<JSONObject>) :

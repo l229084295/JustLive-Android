@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.sunnyweather.android">
+    xmlns:tools="http://schemas.android.com/tools">
     <queries>
         <package android:name="com.eg.android.AlipayGphone"/>
     </queries>
@@ -19,7 +18,7 @@
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" tools:node="remove" />
 
     <application
-        android:name=".SunnyWeatherApplication"
+        android:name="com.sunnyweather.android.SunnyWeatherApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -38,18 +37,18 @@
             android:name="android.max_aspect"
             android:value="2.4" />
         <service
-            android:name=".logic.service.ForegroundService"
+            android:name="com.sunnyweather.android.logic.service.ForegroundService"
             android:enabled="true"
             android:exported="true" />
 
         <service android:name="com.android.cast.dlna.dmc.DLNACastService"/>
 
         <provider
-            android:name=".logic.provider.MySuggestionProvider"
+            android:name="com.sunnyweather.android.logic.provider.MySuggestionProvider"
             android:authorities="com.example.MySuggestionProvider" />
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.sunnyweather.android.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:windowSoftInputMode="adjustPan|stateHidden">
@@ -64,25 +63,25 @@
                 android:value=".ui.search.SearchActivity" />
         </activity>
         <activity
-            android:name=".ui.liveRoom.LiveRoomActivity"
+            android:name="com.sunnyweather.android.ui.liveRoom.LiveRoomActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName="com.sunnyweather.android.MainActivity"
             android:launchMode="singleTask"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".ui.setting.SettingActivity"
+            android:name="com.sunnyweather.android.ui.setting.SettingActivity"
             android:label="设置" />
         <activity
-            android:name=".ui.login.LoginActivity"
+            android:name="com.sunnyweather.android.ui.login.LoginActivity"
             android:label="登录" />
         <activity
-            android:name=".ui.login.RegisterActivity"
+            android:name="com.sunnyweather.android.ui.login.RegisterActivity"
             android:label="注册" />
         <activity
-            android:name=".ui.about.AboutActvity"
+            android:name="com.sunnyweather.android.ui.about.AboutActvity"
             android:label="关于" />
         <activity
-            android:name=".ui.search.SearchActivity"
+            android:name="com.sunnyweather.android.ui.search.SearchActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />

@@ -2,6 +2,7 @@ package com.sunnyweather.android.ui.customerUIs.bottomPop
 
 import android.content.Context
 import android.view.View
+import android.widget.ProgressBar
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -11,10 +12,9 @@ import com.drake.net.Get
 import com.drake.net.utils.scopeNetLife
 import com.lxj.xpopup.core.DrawerPopupView
 import com.lxj.xpopup.util.XPopupUtils
-import com.sunnyweather.android.R
 import com.sunnyweather.android.SunnyWeatherApplication
 import com.sunnyweather.android.logic.model.RoomInfo
-import kotlinx.android.synthetic.main.custom_follow_drawer.view.*
+import com.sunnyweather.android.R
 
 class FollowDrawer(context: Context, private val lifecycleOwner: LifecycleOwner): DrawerPopupView(context) {
 
@@ -29,6 +29,7 @@ class FollowDrawer(context: Context, private val lifecycleOwner: LifecycleOwner)
     override fun onCreate() {
         super.onCreate()
         val recyclerView = findViewById<RecyclerView>(R.id.player_follow_recyclerView)
+        val playerFollowProgressBar = findViewById<ProgressBar>(R.id.player_follow_progressBar)
         recyclerView.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         var adapterFollow = FollowAdapter()
@@ -37,7 +38,7 @@ class FollowDrawer(context: Context, private val lifecycleOwner: LifecycleOwner)
         lifecycleOwner.scopeNetLife { // 创建作用域
             // 这个大括号内就属于作用域内部
             if (SunnyWeatherApplication.isLogin!!.value == true) {
-                player_follow_progressBar.visibility = View.VISIBLE
+                playerFollowProgressBar.visibility = View.VISIBLE
                 val userInfo = SunnyWeatherApplication.userInfo
                 val url = "http://yj1211.work:8013/api/live/getRoomsOn?uid=" + userInfo!!.uid
                 val data = Get<String>(url).await() // 发起GET请求并返回`String`类型数据
@@ -52,7 +53,7 @@ class FollowDrawer(context: Context, private val lifecycleOwner: LifecycleOwner)
                         adapterFollow.addData(roomInfo)
                     }
                 }
-                player_follow_progressBar.visibility = View.GONE
+                playerFollowProgressBar.visibility = View.GONE
             }
         }
     }

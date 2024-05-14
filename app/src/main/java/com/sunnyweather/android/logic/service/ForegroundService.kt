@@ -6,9 +6,9 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import com.sunnyweather.android.R
 import com.sunnyweather.android.ui.liveRoom.LiveRoomActivity
 import com.umeng.commonsdk.stateless.UMSLEnvelopeBuild.mContext
+import com.sunnyweather.android.R
 
 
 class ForegroundService : Service() {

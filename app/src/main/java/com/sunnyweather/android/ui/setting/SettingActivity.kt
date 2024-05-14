@@ -4,16 +4,18 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import com.blankj.utilcode.util.BarUtils
-import com.sunnyweather.android.R
 import com.sunnyweather.android.SunnyWeatherApplication
 import com.sunnyweather.android.SunnyWeatherApplication.Companion.context
-import kotlinx.android.synthetic.main.activity_liveroom.*
-import kotlinx.android.synthetic.main.activity_liveroom.player_container
-import kotlinx.android.synthetic.main.activity_setting.*
+import com.sunnyweather.android.R
+import com.sunnyweather.android.databinding.ActivitySettingBinding
 
 class SettingActivity : AppCompatActivity() {
+
+    lateinit var binding: ActivitySettingBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = ActivitySettingBinding.inflate(layoutInflater)
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
         var theme: Int
         val autoDark = sharedPreferences.getBoolean("autoDark", true)
@@ -37,9 +39,9 @@ class SettingActivity : AppCompatActivity() {
             R.style.PreferenceScreen_night
         }
         setTheme(theme)
-        setContentView(R.layout.activity_setting)
+        setContentView(binding.root)
         BarUtils.transparentStatusBar(this)
-        BarUtils.addMarginTopEqualStatusBarHeight(setting_toolbar)
+        BarUtils.addMarginTopEqualStatusBarHeight(binding.settingToolbar)
         if (theme != R.style.PreferenceScreen_night) {
             BarUtils.setStatusBarLightMode(this, true)
         } else {

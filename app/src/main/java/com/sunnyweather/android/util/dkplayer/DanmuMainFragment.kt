@@ -7,22 +7,25 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayoutMediator
-import com.sunnyweather.android.R
-import kotlinx.android.synthetic.main.fragment_danmu_main.*
+import com.sunnyweather.android.databinding.FragmentDanmuMainBinding
 
 class DanmuMainFragment: Fragment() {
+
+    var binding: FragmentDanmuMainBinding? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_danmu_main, container, false)
+        binding = FragmentDanmuMainBinding.inflate(layoutInflater)
+        return binding?.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        danmu_viewPager.adapter = PagerAdapter(this)
-        TabLayoutMediator(danmu_tabLayout, danmu_viewPager) { tab, position ->
+        binding?.danmuViewPager?.adapter = PagerAdapter(this)
+        TabLayoutMediator(binding!!.danmuTabLayout, binding!!.danmuViewPager) { tab, position ->
             when (position) {
                 0 -> {
                     tab.text = "播放设置"

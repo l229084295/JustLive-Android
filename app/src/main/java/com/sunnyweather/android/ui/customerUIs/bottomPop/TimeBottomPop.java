@@ -11,8 +11,8 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.contrarywind.view.WheelView;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.lxj.xpopup.core.BottomPopupView;
-import com.sunnyweather.android.R;
 import com.sunnyweather.android.ui.liveRoom.LiveRoomActivity;
+import com.sunnyweather.android.R;
 
 import java.util.ArrayList;
 import java.util.List;

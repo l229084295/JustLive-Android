@@ -42,7 +42,6 @@ import com.google.gson.JsonParser
 import com.hjq.permissions.OnPermissionCallback
 import com.hjq.permissions.Permission
 import com.hjq.permissions.XXPermissions
-import com.sunnyweather.android.R
 import com.sunnyweather.android.SunnyWeatherApplication
 import com.sunnyweather.android.SunnyWeatherApplication.Companion.context
 import com.sunnyweather.android.logic.model.DanmuSetting
@@ -57,20 +56,8 @@ import com.sunnyweather.android.util.dkplayer.PIPManager
 import com.sunnyweather.android.util.dkplayer.YJLiveControlView
 import com.sunnyweather.android.util.dkplayer.YJTitleView
 import com.sunnyweather.android.util.dkplayer.YJstandardController
-import kotlinx.android.synthetic.main.activity_liveroom.danMu_recyclerView
-import kotlinx.android.synthetic.main.activity_liveroom.danmu_not_support
-import kotlinx.android.synthetic.main.activity_liveroom.follow_roomInfo
-import kotlinx.android.synthetic.main.activity_liveroom.liveRoom_bar_txt
-import kotlinx.android.synthetic.main.activity_liveroom.liveRoom_leftContainer
-import kotlinx.android.synthetic.main.activity_liveroom.liveRoom_main
-import kotlinx.android.synthetic.main.activity_liveroom.liveRoom_not_live
-import kotlinx.android.synthetic.main.activity_liveroom.ownerName_roomInfo
-import kotlinx.android.synthetic.main.activity_liveroom.ownerPic_roomInfo
-import kotlinx.android.synthetic.main.activity_liveroom.player_container
-import kotlinx.android.synthetic.main.activity_liveroom.roomInfo_liveRoom
-import kotlinx.android.synthetic.main.activity_liveroom.roomName_roomInfo
-import kotlinx.android.synthetic.main.activity_liveroom.to_bottom_danmu
-import kotlinx.android.synthetic.main.activity_liveroom.to_web
+import com.sunnyweather.android.R
+import com.sunnyweather.android.databinding.ActivityLiveroomBinding
 import xyz.doikki.videocontroller.component.CompleteView
 import xyz.doikki.videocontroller.component.ErrorView
 import xyz.doikki.videocontroller.component.PrepareView
@@ -103,6 +90,8 @@ class LiveRoomActivity : AppCompatActivity(), Utils.OnAppStatusChangedListener, 
     private val definitionArray = arrayOf("清晰", "流畅", "高清", "超清", "原画")
     private val sharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
+    lateinit var binding: ActivityLiveroomBinding
+
     open fun getUrl(): String {
         return playerUrl;
     }
@@ -116,7 +105,7 @@ class LiveRoomActivity : AppCompatActivity(), Utils.OnAppStatusChangedListener, 
 
     fun stopFullScreen() {
         adapter.setList(viewModel.danmuList)
-        danMu_recyclerView.scrollToPosition(adapter.itemCount-1)
+        binding.danMuRecyclerView.scrollToPosition(adapter.itemCount-1)
         mMyDanmakuView.hide()
         toBottom = true
         updateList = true
@@ -124,6 +113,7 @@ class LiveRoomActivity : AppCompatActivity(), Utils.OnAppStatusChangedListener, 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = ActivityLiveroomBinding.inflate(layoutInflater)
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         var theme: Int
         val autoDark = sharedPreferences.getBoolean("autoDark", true)
@@ -144,14 +134,14 @@ class LiveRoomActivity : AppCompatActivity(), Utils.OnAppStatusChangedListener, 
         } else {
             setTheme(theme)
         }
-        setContentView(R.layout.activity_liveroom)
+        setContentView(binding.root)
         val playBackGround = sharedPreferences.getBoolean("play_background", false)
         val backTiny = sharedPreferences.getBoolean("tiny_when_back", false)
         if (playBackGround || backTiny) {
             AppUtils.registerAppStatusChangedListener(this)
         }
         BarUtils.transparentStatusBar(this)
-        BarUtils.addMarginTopEqualStatusBarHeight(liveRoom_main)
+        BarUtils.addMarginTopEqualStatusBarHeight(binding.liveRoomMain)
         BarUtils.setStatusBarColor(this, resources.getColor(R.color.black))
         startCountdown()
         //设置滑动到底部的动画时间
@@ -175,24 +165,24 @@ class LiveRoomActivity : AppCompatActivity(), Utils.OnAppStatusChangedListener, 
         sharedPref = this.getSharedPreferences("JustLive", Context.MODE_PRIVATE)
         danmuSetting = getDanmuSetting()
 
-        danMu_recyclerView.layoutManager = linearLayoutManager
+        binding.danMuRecyclerView.layoutManager = linearLayoutManager
         adapter = LiveRoomAdapterNew()
-        danMu_recyclerView.adapter = adapter
-        danMu_recyclerView.itemAnimator = null
+        binding.danMuRecyclerView.adapter = adapter
+        binding.danMuRecyclerView.itemAnimator = null
         //绑定回到底部按钮
-        to_bottom_danmu.setOnClickListener {
-            danMu_recyclerView.scrollToPosition(adapter.itemCount-1)
-            to_bottom_danmu.visibility = View.GONE
+        binding.toBottomDanmu.setOnClickListener {
+            binding.danMuRecyclerView.scrollToPosition(adapter.itemCount-1)
+            binding.toBottomDanmu.visibility = View.GONE
             toBottom = true
         }
         //向上滚动弹幕时，显示回到底部按钮
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            danMu_recyclerView.setOnScrollChangeListener { _, _, _, _, _ ->
-                if (danMu_recyclerView.canScrollVertically(1)) {
+            binding.danMuRecyclerView.setOnScrollChangeListener { _, _, _, _, _ ->
+                if (binding.danMuRecyclerView.canScrollVertically(1)) {
                     toBottom = false
-                    to_bottom_danmu.visibility = View.VISIBLE
+                    binding.toBottomDanmu.visibility = View.VISIBLE
                 } else {
-                    to_bottom_danmu.visibility = View.GONE
+                    binding.toBottomDanmu.visibility = View.GONE
                     toBottom = true
                 }
             }
@@ -201,23 +191,23 @@ class LiveRoomActivity : AppCompatActivity(), Utils.OnAppStatusChangedListener, 
         if (ScreenUtils.isPortrait()) {
             //竖屏
             ScreenUtils.setPortrait(this)
-            val lp = player_container.layoutParams
+            val lp = binding.playerContainer.layoutParams
             val point = Point()
             this.windowManager.defaultDisplay.getRealSize(point)
             lp.height = point.x * 9 / 16
-            player_container.layoutParams = lp
+            binding.playerContainer.layoutParams = lp
         } else {
             //横屏
             ScreenUtils.setLandscape(this)
-            val lpc = liveRoom_leftContainer.layoutParams
+            val lpc = binding.liveRoomLeftContainer?.layoutParams
             val pointc = Point()
             this.windowManager.defaultDisplay.getRealSize(pointc)
             if (DeviceUtils.isTablet()) {
-                lpc.width = ScreenUtils.getScreenWidth() * 4 / 5
+                lpc?.width = ScreenUtils.getScreenWidth() * 4 / 5
             } else {
-                lpc.width = (ScreenUtils.getScreenHeight() - ConvertUtils.dp2px(60f) - BarUtils.getStatusBarHeight()) * 16 / 9
+                lpc?.width = (ScreenUtils.getScreenHeight() - ConvertUtils.dp2px(60f) - BarUtils.getStatusBarHeight()) * 16 / 9
             }
-            liveRoom_leftContainer.layoutParams = lpc
+            binding.liveRoomLeftContainer?.layoutParams = lpc
         }
 
         controller = YJstandardController(this, this)
@@ -252,7 +242,7 @@ class LiveRoomActivity : AppCompatActivity(), Utils.OnAppStatusChangedListener, 
         viewModel.getRoomInfo(uid, platform, roomId)
         viewModel.getRealUrl(platform, roomId)
         //去网页
-        to_web.setOnClickListener {
+        binding.toWeb.setOnClickListener {
             toWeb(platform, roomId)
         }
         //弹幕更新
@@ -262,7 +252,7 @@ class LiveRoomActivity : AppCompatActivity(), Utils.OnAppStatusChangedListener, 
                 if (updateList) {
                     adapter.addData(viewModel.danmuList.last())
                     if (toBottom) {
-                        danMu_recyclerView.scrollToPosition(adapter.itemCount - 1)
+                        binding.danMuRecyclerView.scrollToPosition(adapter.itemCount - 1)
                     }
                 }
             }
@@ -279,7 +269,7 @@ class LiveRoomActivity : AppCompatActivity(), Utils.OnAppStatusChangedListener, 
 //                            controller?.setPlayerState(videoView!!.currentPlayerState)
                     mMyDanmakuView.stopFloatPrepare()
                 }
-                player_container.addView(videoView)
+                binding.playerContainer.addView(videoView)
                 videoView?.setVideoController(controller) //设置控制器
                 val sharedPref = this.getSharedPreferences("JustLive", Context.MODE_PRIVATE)
 
@@ -305,10 +295,10 @@ class LiveRoomActivity : AppCompatActivity(), Utils.OnAppStatusChangedListener, 
             if (result is String) {
                 Toast.makeText(this, result, Toast.LENGTH_SHORT).show()
                 if (result == "关注成功") {
-                    follow_roomInfo.text = "已关注"
+                    binding.followRoomInfo.text = "已关注"
                     isFollowed = true
                 } else if (result == "已经取消关注") {
-                    follow_roomInfo.text = "关注"
+                    binding.followRoomInfo.text = "关注"
                     isFollowed = false
                 }
             }
@@ -320,16 +310,16 @@ class LiveRoomActivity : AppCompatActivity(), Utils.OnAppStatusChangedListener, 
                 //关注按钮
                 if (isFirstGetInfo) {
                     if (ScreenUtils.isLandscape()) {
-                        ownerName_roomInfo.text =
+                        binding.ownerNameRoomInfo.text =
                             SunnyWeatherApplication.platformName(roomInfo.platForm) + "·" + roomInfo.ownerName
-                        roomName_roomInfo.text = roomInfo.roomName
+                        binding.roomNameRoomInfo.text = roomInfo.roomName
                     } else {
-                        ownerName_roomInfo.text =
+                        binding.ownerNameRoomInfo.text =
                             SunnyWeatherApplication.platformName(roomInfo.platForm)
-                        roomName_roomInfo.text = roomInfo.ownerName
-                        liveRoom_bar_txt.text = roomInfo.roomName
+                        binding.roomNameRoomInfo.text = roomInfo.ownerName
+                        binding.liveRoomBarTxt.text = roomInfo.roomName
                     }
-                    follow_roomInfo.setOnClickListener {
+                    binding.followRoomInfo.setOnClickListener {
                         if (SunnyWeatherApplication.isLogin.value!!) {
                             if (isFollowed) {
                                 viewModel.unFollow(
@@ -361,25 +351,25 @@ class LiveRoomActivity : AppCompatActivity(), Utils.OnAppStatusChangedListener, 
                     }
                     //提示弹幕不支持
                     if (!SunnyWeatherApplication.ifDanmuSupport(platform)) {
-                        danmu_not_support.visibility = View.VISIBLE
-                        danmu_not_support.text =
+                        binding.danmuNotSupport.visibility = View.VISIBLE
+                        binding.danmuNotSupport.text =
                             "暂不支持${SunnyWeatherApplication.platformName(roomInfo.platForm)}弹幕"
                     }
                     //未开播
                     if (roomInfo.isLive == 0) {
-                        liveRoom_not_live.visibility = View.VISIBLE
+                        binding.liveRoomNotLive.visibility = View.VISIBLE
                         //点击播放器区域显示关注窗口
-                        liveRoom_not_live.setOnClickListener {
-                            changeRoomInfoVisible(roomInfo_liveRoom.layoutParams.height == 0)
+                        binding.liveRoomNotLive.setOnClickListener {
+                            changeRoomInfoVisible(binding.roomInfoLiveRoom.layoutParams.height == 0)
                         }
                     }
                     Glide.with(this).load(roomInfo.ownerHeadPic).transition(
                         DrawableTransitionOptions.withCrossFade()
-                    ).into(ownerPic_roomInfo)
+                    ).into(binding.ownerPicRoomInfo)
                     isFirstGetInfo = false
                 }
                 isFollowed = (roomInfo.isFollowed == 1)
-                if (isFollowed) follow_roomInfo.text = "已关注"
+                if (isFollowed) binding.followRoomInfo.text = "已关注"
             } else if (roomInfo is String) {
                 Toast.makeText(this, roomInfo, Toast.LENGTH_SHORT).show()
                 result.exceptionOrNull()?.printStackTrace()
@@ -427,9 +417,9 @@ class LiveRoomActivity : AppCompatActivity(), Utils.OnAppStatusChangedListener, 
         }
         va.addUpdateListener {
             val h: Int = it.animatedValue as Int
-            roomInfo_liveRoom.layoutParams.height = h
-            roomInfo_liveRoom.requestLayout()
-            danMu_recyclerView.scrollToPosition(adapter.itemCount-1)
+            binding.roomInfoLiveRoom.layoutParams.height = h
+            binding.roomInfoLiveRoom.requestLayout()
+            binding.danMuRecyclerView.scrollToPosition(adapter.itemCount-1)
         }
         va.duration = 200
         va.start()
@@ -648,7 +638,7 @@ class LiveRoomActivity : AppCompatActivity(), Utils.OnAppStatusChangedListener, 
         val intent = Intent(this, ForegroundService::class.java)
         intent.putExtra("platform", platform)
         intent.putExtra("roomId", roomId)
-        intent.putExtra("roomInfo", "${ownerName_roomInfo.text}:${roomName_roomInfo.text}")
+        intent.putExtra("roomInfo", "${binding.ownerNameRoomInfo.text}:${binding.roomNameRoomInfo.text}")
         startService(intent)
     }
 
@@ -706,13 +696,13 @@ class LiveRoomActivity : AppCompatActivity(), Utils.OnAppStatusChangedListener, 
             var result: JSONObject = JSONObject.parseObject(data.await()).getJSONObject("data")
             Glide.with(context).load(result.getString("ownerHeadPic")).transition(
                 DrawableTransitionOptions.withCrossFade()
-            ).into(ownerPic_roomInfo)
-            ownerName_roomInfo.text =
+            ).into(binding.ownerPicRoomInfo)
+            binding.ownerNameRoomInfo.text =
                 SunnyWeatherApplication.platformName(result.getString("platForm"))
-            roomName_roomInfo.text = result.getString("ownerName")
-            liveRoom_bar_txt.text = result.getString("roomName")
+            binding.roomNameRoomInfo.text = result.getString("ownerName")
+            binding.liveRoomBarTxt.text = result.getString("roomName")
             isFollowed = (result.getInteger("isFollowed") == 1)
-            if (isFollowed) follow_roomInfo.text = "已关注"
+            if (isFollowed) binding.followRoomInfo.text = "已关注"
 
             var realUrlResult: JSONObject =
                 JSONObject.parseObject(realUrlData.await()).getJSONObject("data")

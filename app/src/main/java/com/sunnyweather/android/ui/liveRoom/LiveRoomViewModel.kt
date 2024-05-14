@@ -1,8 +1,8 @@
 package com.sunnyweather.android.ui.liveRoom
 
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.switchMap
 import com.sunnyweather.android.logic.Repository
 import com.sunnyweather.android.logic.danmu.DanmuService
 import com.sunnyweather.android.logic.model.DanmuSetting
@@ -19,7 +19,7 @@ class LiveRoomViewModel : ViewModel() {
     var danmuService: DanmuService? = null
     private val followLiveData = MutableLiveData<FollowRequest>()
 
-    val followResponseLiveDate = Transformations.switchMap(followLiveData) {
+    val followResponseLiveDate = followLiveData.switchMap {
             value ->
             if (value.toFollow) {
                 Repository.follow(value.platform, value.roomId, value.uid)
@@ -30,10 +30,10 @@ class LiveRoomViewModel : ViewModel() {
     private val urlsRequestData = MutableLiveData<UrlRequest>()
     private val roomInfoRequestData = MutableLiveData<RoomInfoRequest>()
 
-    val urlResponseData = Transformations.switchMap(urlsRequestData) {
+    val urlResponseData = urlsRequestData.switchMap {
         value -> Repository.getRealUrl(value.platform, value.roomId)
     }
-    val roomInfoResponseData = Transformations.switchMap(roomInfoRequestData) {
+    val roomInfoResponseData = roomInfoRequestData.switchMap {
             value -> Repository.getRoomInfo(value.uid, value.platform, value.roomId)
     }
 

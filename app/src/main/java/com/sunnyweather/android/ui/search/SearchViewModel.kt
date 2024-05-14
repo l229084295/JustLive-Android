@@ -1,8 +1,8 @@
 package com.sunnyweather.android.ui.search
 
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.switchMap
 import com.sunnyweather.android.logic.Repository
 import com.sunnyweather.android.logic.model.Owner
 
@@ -11,7 +11,7 @@ class SearchViewModel : ViewModel(){
 
     private val searchWordLiveData = MutableLiveData<SearchRequest>()
     var ownersList = ArrayList<Owner>()
-    val ownerListLiveData = Transformations.switchMap(searchWordLiveData) {
+    val ownerListLiveData = searchWordLiveData.switchMap {
         value -> Repository.search(value.platform, value.keyWords, value.uid)
     }
 

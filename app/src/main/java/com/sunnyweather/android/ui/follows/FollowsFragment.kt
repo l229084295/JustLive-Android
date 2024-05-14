@@ -9,31 +9,33 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayoutMediator
 import com.sunnyweather.android.R
-import kotlinx.android.synthetic.main.fragment_follows.*
+import com.sunnyweather.android.databinding.FragmentFollowsBinding
 
 private const val NUM_PAGES = 2
 private var showLogin = false
 
 class FollowsFragment : Fragment() {
     private lateinit var viewPager: ViewPager2
+    var binding: FragmentFollowsBinding? = null
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_follows, container, false)
+        binding = FragmentFollowsBinding.inflate(layoutInflater)
+        return binding?.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         //ViewPager2
-        viewPager = viewpage_follows
+        viewPager = binding!!.viewpageFollows
         val pagerAdapter = ScreenSlidePagerAdapter(this)
         viewPager.adapter = pagerAdapter
         viewPager.offscreenPageLimit = 2
-        viewpage_follows.isUserInputEnabled = false
+        binding!!.viewpageFollows.isUserInputEnabled = false
         //tabLayout
-        TabLayoutMediator(tab_follows, viewpage_follows){tab, position ->
+        TabLayoutMediator(binding!!.tabFollows, binding!!.viewpageFollows){tab, position ->
             when(position) {
                 0 -> tab.text = "直播中"
                 else -> tab.text = "未开播"
@@ -52,6 +54,6 @@ class FollowsFragment : Fragment() {
     }
 
     fun enableInput() {
-        viewpage_follows.isUserInputEnabled = true
+        binding?.viewpageFollows?.isUserInputEnabled = true
     }
 }

@@ -13,19 +13,20 @@ import androidx.preference.PreferenceManager
 import com.blankj.utilcode.util.BarUtils
 import com.google.android.material.textfield.TextInputLayout
 import com.roger.gifloadinglibrary.GifLoadingView
-import com.sunnyweather.android.R
 import com.sunnyweather.android.SunnyWeatherApplication
 import com.sunnyweather.android.SunnyWeatherApplication.Companion.context
 import com.sunnyweather.android.logic.model.UserInfo
-import kotlinx.android.synthetic.main.activity_register.*
+import com.sunnyweather.android.R
+import com.sunnyweather.android.databinding.ActivityRegisterBinding
 
 class RegisterActivity: AppCompatActivity() {
     private val viewModel by lazy { ViewModelProvider(this).get(LoginViewModel::class.java) }
     private val userNameRex = "^[^\\u4e00-\\u9fa5]+\$"
     private val mGifLoadingView = GifLoadingView()
-
+    lateinit var binding: ActivityRegisterBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = ActivityRegisterBinding.inflate(layoutInflater)
         //颜色主题
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         var theme: Int
@@ -47,14 +48,14 @@ class RegisterActivity: AppCompatActivity() {
         } else {
             setTheme(theme)
         }
-        setContentView(R.layout.activity_register)
+        setContentView(binding.root)
         if (theme != R.style.nightTheme) {
             BarUtils.setStatusBarLightMode(this, true)
         } else {
             BarUtils.setStatusBarLightMode(this, false)
         }
         BarUtils.transparentStatusBar(this)
-        viewModel.registerResponseLiveDate.observe(this, { result ->
+        viewModel.registerResponseLiveDate.observe(this) { result ->
             val resultData = result.getOrNull()
             if (resultData is UserInfo) {
                 "注册成功".showToast(context)
@@ -63,53 +64,53 @@ class RegisterActivity: AppCompatActivity() {
                 mGifLoadingView.dismiss()
                 resultData.showToast(context)
             }
-        })
+        }
         //用户名校验
-        userName_content_register.doOnTextChanged { text, _, _, _ ->
+        binding.userNameContentRegister.doOnTextChanged { text, _, _, _ ->
             val count = text!!.length
             if(count > 0 && !match(userNameRex, text.toString())) {
-                username_text_register.error = getString(R.string.userNameError)
+                binding.usernameTextRegister.error = getString(R.string.userNameError)
             } else if(count in 1..5){
-                username_text_register.error = getString(R.string.userNameError6)
+                binding.usernameTextRegister.error = getString(R.string.userNameError6)
             } else if(count > 20) {
-                username_text_register.error = getString(R.string.userNameError20)
+                binding.usernameTextRegister.error = getString(R.string.userNameError20)
             } else {
-                username_text_register.error = null
+                binding.usernameTextRegister.error = null
             }
         }
         //昵称校验
-        nickName_content_register.doOnTextChanged { text, _, _, _ ->
+        binding.nickNameContentRegister.doOnTextChanged { text, _, _, _ ->
             val count = text!!.length
             if(count > 20) {
-                nickname_text_register.error = getString(R.string.userNameError20)
+                binding.nicknameTextRegister.error = getString(R.string.userNameError20)
             } else {
-                nickname_text_register.error = null
+                binding.nicknameTextRegister.error = null
             }
         }
         //密码框校验
-        password_content_register.doOnTextChanged { text, _, _, _ ->
+        binding.passwordContentRegister.doOnTextChanged { text, _, _, _ ->
             if (text!!.isNotEmpty()) {
-                password_text_register.error = null
+                binding.passwordTextRegister.error = null
             }
-            if (password_content_register.text.toString() == text.toString()){
-                repassword_text_register.error = null
+            if (binding.passwordContentRegister.text.toString() == text.toString()){
+                binding.repasswordTextRegister.error = null
             }
         }
         //重复密码校验
-        repassword_content_register.doOnTextChanged { text, _, _, _ ->
-            if (password_content_register.text.toString() != text.toString()) {
-                repassword_text_register.error = getString(R.string.registerRePasswordError)
+        binding.repasswordContentRegister.doOnTextChanged { text, _, _, _ ->
+            if (binding.passwordContentRegister.text.toString() != text.toString()) {
+                binding.repasswordTextRegister.error = getString(R.string.registerRePasswordError)
             } else {
-                repassword_text_register.error = null
+                binding.repasswordTextRegister.error = null
             }
         }
         //提交注册
-        registerBtn.setOnClickListener {
+        binding.registerBtn.setOnClickListener {
             hideInput(this)
             if (checkAll()){
-                val userName = userName_content_register.text.toString()
-                val password = SunnyWeatherApplication.encodeMD5(password_content_register.text.toString())
-                val nickname = nickName_content_register.text.toString()
+                val userName = binding.userNameContentRegister.text.toString()
+                val password = SunnyWeatherApplication.encodeMD5(binding.passwordContentRegister.text.toString())
+                val nickname = binding.nickNameContentRegister.text.toString()
                 viewModel.doRegister(userName, password, nickname)
                 mGifLoadingView.setImageResource(R.drawable.load_knife)
                 mGifLoadingView.show(fragmentManager)
@@ -119,10 +120,10 @@ class RegisterActivity: AppCompatActivity() {
 
     //提交注册前检验各个输入框是否正确
     private fun checkAll(): Boolean{
-        if (!checkIfCorrect(username_text_register, userName_content_register)) return false
-        if (!checkIfCorrect(nickname_text_register, nickName_content_register)) return false
-        if (!checkIfCorrect(password_text_register, password_content_register)) return false
-        if (!checkIfCorrect(repassword_text_register, repassword_content_register)) return false
+        if (!checkIfCorrect(binding.usernameTextRegister, binding.userNameContentRegister)) return false
+        if (!checkIfCorrect(binding.nicknameTextRegister, binding.nickNameContentRegister)) return false
+        if (!checkIfCorrect(binding.passwordTextRegister, binding.passwordContentRegister)) return false
+        if (!checkIfCorrect(binding.repasswordTextRegister, binding.repasswordContentRegister)) return false
         return true
     }
     //判断是否正确

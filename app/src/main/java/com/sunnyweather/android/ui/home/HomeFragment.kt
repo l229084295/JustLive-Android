@@ -11,21 +11,23 @@ import com.alibaba.fastjson.JSONObject
 import com.angcyo.tablayout.delegate2.ViewPager2Delegate
 import com.drake.net.Get
 import com.drake.net.utils.scopeNetLife
-import com.sunnyweather.android.R
 import com.sunnyweather.android.SunnyWeatherApplication
 import com.sunnyweather.android.logic.network.ServiceCreator
-import kotlinx.android.synthetic.main.fragment_home.*
+import com.sunnyweather.android.R
+import com.sunnyweather.android.databinding.FragmentHomeBinding
 
 private var NUM_PAGES = 6
 
 class HomeFragment : Fragment() {
     private lateinit var viewPager: ViewPager2
+    var binding: FragmentHomeBinding? = null
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_home, container, false)
+        binding = FragmentHomeBinding.inflate(layoutInflater)
+        return binding?.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -45,16 +47,16 @@ class HomeFragment : Fragment() {
                 val tabView = TextView(context)
                 tabView.text = item.getString("name")
                 tabView.gravity = Gravity.CENTER
-                tab_home.addView(tabView)
+                binding?.tabHome?.addView(tabView)
             }
         }
         //ViewPager2
-        viewPager = viewpage_home
+        viewPager = binding!!.viewpageHome
         val pagerAdapter = ScreenSlidePagerAdapter(this, fragments)
         viewPager.adapter = pagerAdapter
 //        viewPager.offscreenPageLimit = 5
         //tabLayout
-        ViewPager2Delegate.install(viewPager, tab_home)
+        ViewPager2Delegate.install(viewPager, binding!!.tabHome)
     }
 
     private inner class ScreenSlidePagerAdapter(fa: Fragment, private val fragments: List<Fragment>) : FragmentStateAdapter(fa) {

@@ -103,7 +103,6 @@ class SunnyWeatherApplication : Application() {
         UMConfigure.preInit(this, "6159ddaf14e22b6a4f146772", "QQ群")
         UMConfigure.init(this,"6159ddaf14e22b6a4f146772","QQ群",UMConfigure.DEVICE_TYPE_PHONE, "")
         context = applicationContext
-        BRV.modelId = BR.areaFollow
         VideoViewManager.setConfig(
             VideoViewConfig.newBuilder()
             //使用ExoPlayer解码

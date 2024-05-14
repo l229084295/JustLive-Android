@@ -26,12 +26,8 @@ import com.paulrybitskyi.persistentsearchview.listeners.OnSearchConfirmedListene
 import com.paulrybitskyi.persistentsearchview.listeners.OnSearchQueryChangeListener
 import com.paulrybitskyi.persistentsearchview.listeners.OnSuggestionChangeListener
 import com.paulrybitskyi.persistentsearchview.utils.SuggestionCreationUtil
-import com.sunnyweather.android.R
 import com.sunnyweather.android.logic.model.AreaInfo
 import com.sunnyweather.android.ui.roomList.SpaceItemDecoration
-import kotlinx.android.synthetic.main.activity_search.*
-import kotlinx.android.synthetic.main.fragment_area.view.*
-import kotlinx.android.synthetic.main.fragment_arealist.*
 import java.lang.StringBuilder
 import androidx.preference.PreferenceManager
 import com.bumptech.glide.Glide
@@ -44,6 +40,8 @@ import com.lxj.xpopup.enums.PopupPosition
 import com.sunnyweather.android.MainActivity
 import com.sunnyweather.android.logic.model.AreaFollow
 import com.sunnyweather.android.logic.network.ServiceCreator
+import com.sunnyweather.android.R
+import com.sunnyweather.android.databinding.FragmentAreaBinding
 
 class AreaPopup(context: Context,
                 private val lifecycleOwner: LifecycleOwner
@@ -55,6 +53,7 @@ class AreaPopup(context: Context,
     private lateinit var historySearchList: ArrayList<String>
     private var searchList = ArrayList<AreaInfo>()
     private lateinit var recyclerView: RecyclerView
+    lateinit var binding: FragmentAreaBinding
 //    private lateinit var adapter: AreaSearchAdapter
 
     override fun getImplLayoutId(): Int {
@@ -63,6 +62,7 @@ class AreaPopup(context: Context,
 
     override fun onCreate() {
         super.onCreate()
+        binding = FragmentAreaBinding.inflate(LayoutInflater.from(context))
         recyclerView = findViewById(R.id.recyclerView_search_area)
         var cardNum = ScreenUtils.getAppScreenWidth()/ ConvertUtils.dp2px(129F)
         if (cardNum < 2) cardNum = 2
@@ -106,48 +106,45 @@ class AreaPopup(context: Context,
                     }.show()
             }
         }.models = searchList
+        binding.apply {
+            recyclerViewSearchArea.visibility = View.GONE
+            tabArea.visibility = View.VISIBLE
+            viewpageArea.visibility = View.VISIBLE
+            //ViewPager2
+            viewPager = viewpageArea
+            initSearch()
+            val searchQueries = if(areaSearch.isInputQueryEmpty) {
+                getInitialSearchQueries()
+            } else {
+                getSuggestionsForQuery(areaSearch.inputQuery)
+            }
+            setSuggestions(searchQueries, false)
 
-        recyclerView_search_area.visibility = View.GONE
-        tab_area.visibility = View.VISIBLE
-        viewpage_area.visibility = View.VISIBLE
-        //ViewPager2
-        viewPager = viewpage_area
-        initSearch()
-        val searchQueries = if(area_search.isInputQueryEmpty) {
-            getInitialSearchQueries()
-        } else {
-            getSuggestionsForQuery(area_search.inputQuery)
-        }
-        setSuggestions(searchQueries, false)
-
-        area_follow_button.setOnClickListener {
-            XPopup.Builder(context)
-                .isDestroyOnDismiss(true) //对于只使用一次的弹窗，推荐设置这个
-                .atView(area_follow_button)
-                .isViewMode(true)
-                .maxHeight(ScreenUtils.getAppScreenHeight() / 2)
-                .asCustom(AreaFollowAttach(context))
-                .show()
-        }
-        lifecycleOwner.scopeNetLife { // 创建作用域
-            val url = ServiceCreator.getRequestUrl() + "/api/live/getAllAreas"
-            val data = Get<String>(url) // 发起GET请求并返回`String`类型数据
-            var resultJson: JSONArray = JSONObject.parseObject(data.await()).getJSONArray("data")
-            var areas: List<List<*>> = JSON.parseArray(resultJson.toJSONString(), List::class.java)
-            if (areas != null) {
+            areaFollowButton.setOnClickListener {
+                XPopup.Builder(context)
+                    .isDestroyOnDismiss(true) //对于只使用一次的弹窗，推荐设置这个
+                    .atView(areaFollowButton)
+                    .isViewMode(true)
+                    .maxHeight(ScreenUtils.getAppScreenHeight() / 2)
+                    .asCustom(AreaFollowAttach(context))
+                    .show()
+            }
+            lifecycleOwner.scopeNetLife { // 创建作用域
+                val url = ServiceCreator.getRequestUrl() + "/api/live/getAllAreas"
+                val data = Get<String>(url) // 发起GET请求并返回`String`类型数据
+                var resultJson: JSONArray = JSONObject.parseObject(data.await()).getJSONArray("data")
+                var areas: List<List<*>> = JSON.parseArray(resultJson.toJSONString(), List::class.java)
                 sortArea(areas)
                 val pagerAdapter = ScreenSlidePagerAdapter(context as FragmentActivity)
                 for (areaType in areaTypeList) {
                     val textView = TextView(context)
                     textView.text = areaType
                     textView.gravity = Gravity.CENTER
-                    tab_area.addView(textView)
+                    tabArea.addView(textView)
                 }
                 viewPager.adapter = pagerAdapter
                 //tabLayout
-                ViewPager2Delegate.install(viewPager, tab_area)
-            } else {
-                ToastUtils.showShort("没有更多直播间")
+                ViewPager2Delegate.install(viewPager, tabArea)
             }
         }
     }
@@ -174,7 +171,7 @@ class AreaPopup(context: Context,
 //        initRecyclerView()
     }
 
-    private fun initSearchView() = with(area_search) {
+    private fun initSearchView() = with(binding.areaSearch) {
         setOnLeftBtnClickListener(this@AreaPopup)
         setOnClearInputBtnClickListener(this@AreaPopup)
         setOnSearchConfirmedListener(mOnSearchConfirmedListener) //提交搜索监听
@@ -248,7 +245,7 @@ class AreaPopup(context: Context,
     //设置搜索结果
     private fun setSuggestions(queries: List<String>, expandIfNecessary: Boolean) {
         val suggestions: List<SuggestionItem> = SuggestionCreationUtil.asRecentSearchSuggestions(queries)
-        area_search.setSuggestions(suggestions, expandIfNecessary)
+        binding.areaSearch.setSuggestions(suggestions, expandIfNecessary)
     }
 
     //保存历史记录
@@ -268,12 +265,12 @@ class AreaPopup(context: Context,
         searchList.clear()
         recyclerView.adapter?.notifyDataSetChanged()
         //隐藏分类
-        tab_area.visibility = View.GONE
-        viewpage_area.visibility = View.GONE
+        binding.tabArea.visibility = View.GONE
+        binding.viewpageArea.visibility = View.GONE
         //搜索view
-        recyclerView_search_area.visibility = View.VISIBLE
-        area_search.hideProgressBar(false)
-        area_search.showLeftButton()
+        binding.recyclerViewSearchArea.visibility = View.VISIBLE
+        binding.areaSearch.hideProgressBar(false)
+        binding.areaSearch.showLeftButton()
         areaMap.values.forEach { list ->
             list.forEach { area ->
                 if (area.getString("areaName").lowercase().contains(query.lowercase())) {
@@ -319,24 +316,24 @@ class AreaPopup(context: Context,
     override fun onClick(v: View?) {
         when(v?.id) {
             R.id.leftBtnIv -> {
-                if (tab_area.visibility == View.VISIBLE) {
+                if (binding.tabArea.visibility == View.VISIBLE) {
                     this.dismiss()
                 } else {
-                    tab_area.visibility = View.VISIBLE
-                    viewpage_area.visibility = View.VISIBLE
-                    recyclerView_search_area.visibility = View.GONE
+                    binding.tabArea.visibility = View.VISIBLE
+                    binding.viewpageArea.visibility = View.VISIBLE
+                    binding.recyclerViewSearchArea.visibility = View.GONE
                 }
             }
         }
     }
 
     override fun onBackPressed(): Boolean {
-        if (tab_area.visibility == View.VISIBLE) {
+        if (binding.tabArea.visibility == View.VISIBLE) {
             this.dismiss()
         } else {
-            tab_area.visibility = View.VISIBLE
-            viewpage_area.visibility = View.VISIBLE
-            recyclerView_search_area.visibility = View.GONE
+            binding.tabArea.visibility = View.VISIBLE
+            binding.viewpageArea.visibility = View.VISIBLE
+            binding.recyclerViewSearchArea.visibility = View.GONE
         }
         return true
     }

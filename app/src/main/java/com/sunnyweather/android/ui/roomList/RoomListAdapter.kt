@@ -15,12 +15,11 @@ import com.blankj.utilcode.util.ImageUtils
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
 import com.chad.library.adapter.base.module.LoadMoreModule
-import com.sunnyweather.android.R
 import com.sunnyweather.android.SunnyWeatherApplication
 import com.sunnyweather.android.logic.model.RoomInfo
 import com.sunnyweather.android.ui.customerUIs.BlackWhiteTransformation
 import com.sunnyweather.android.ui.liveRoom.LiveRoomActivity
-import kotlinx.android.synthetic.main.activity_liveroom.*
+import com.sunnyweather.android.R
 
 class RoomListAdapter(private val fragment: Fragment, private val roomList: ArrayList<RoomInfo>) :
     RecyclerView.Adapter<RoomListAdapter.ViewHolder>(), LoadMoreModule{

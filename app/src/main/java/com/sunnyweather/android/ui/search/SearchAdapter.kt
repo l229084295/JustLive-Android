@@ -10,10 +10,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.sunnyweather.android.R
 import com.sunnyweather.android.SunnyWeatherApplication
 import com.sunnyweather.android.logic.model.Owner
 import com.sunnyweather.android.ui.liveRoom.LiveRoomActivity
+import com.sunnyweather.android.R
 
 class SearchAdapter(private val activity: SearchActivity, private val ownerList: List<Owner>) :
     RecyclerView.Adapter<SearchAdapter.ViewHolder>(){

@@ -11,32 +11,33 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.sunnyweather.android.R
 import com.sunnyweather.android.SunnyWeatherApplication
 import com.sunnyweather.android.logic.model.UserInfo
 import com.sunnyweather.android.ui.liveRoom.LiveRoomActivity
 import com.sunnyweather.android.ui.login.LoginActivity
 import com.sunnyweather.android.ui.login.LoginViewModel
-import kotlinx.android.synthetic.main.fragment_danmu_banned.*
+import com.sunnyweather.android.databinding.FragmentDanmuBannedBinding
 
 class DanmuBanFragment: Fragment() {
     private val viewModel by lazy { ViewModelProvider(this).get(LoginViewModel::class.java) }
     private var banContents =  ArrayList<String>()
     private var isSelectedArray =  ArrayList<String>()
     private var loadedBan = false
+    var binding: FragmentDanmuBannedBinding? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_danmu_banned, container, false)
+        binding = FragmentDanmuBannedBinding.inflate(layoutInflater)
+        return binding?.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         if (SunnyWeatherApplication.isLogin.value!!) {
-            active_ban.isChecked = SunnyWeatherApplication.userInfo!!.isActived == "1"
+            binding?.activeBan?.isChecked = SunnyWeatherApplication.userInfo!!.isActived == "1"
             val banContentsString = SunnyWeatherApplication.userInfo!!.allContent
             val isSelectString = SunnyWeatherApplication.userInfo!!.selectedContent
             if (banContentsString != ""){
@@ -56,9 +57,9 @@ class DanmuBanFragment: Fragment() {
             }
             addClips()
         }
-        if (SunnyWeatherApplication.isLogin!!.value!!) {
-            active_ban.setOnCheckedChangeListener { buttonView, isChecked ->
-                if (SunnyWeatherApplication.isLogin!!.value!!) {
+        if (SunnyWeatherApplication.isLogin.value!!) {
+            binding?.activeBan?.setOnCheckedChangeListener { buttonView, isChecked ->
+                if (SunnyWeatherApplication.isLogin.value!!) {
                     saveBanActive(isChecked)
                     val context = context as LiveRoomActivity
                     context.changeBanActive(isChecked)
@@ -70,9 +71,9 @@ class DanmuBanFragment: Fragment() {
                 }
             }
         } else {
-            active_ban.visibility = View.INVISIBLE
-            active_ban_txt.visibility = View.VISIBLE
-            active_ban_txt.setOnClickListener {
+            binding?.activeBan?.visibility = View.INVISIBLE
+            binding?.activeBanTxt?.visibility = View.VISIBLE
+            binding?.activeBanTxt?.setOnClickListener {
                 //没登录去登陆
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle("提醒")
@@ -89,7 +90,7 @@ class DanmuBanFragment: Fragment() {
             }
         }
 
-        add_ban_btn.setOnClickListener {
+        binding?.addBanBtn?.setOnClickListener {
             //没登录去登陆
             if (!SunnyWeatherApplication.isLogin.value!!) {
                 MaterialAlertDialogBuilder(requireContext())
@@ -105,7 +106,7 @@ class DanmuBanFragment: Fragment() {
                     }
                     .show()
             }else {
-                val text = add_ban_content.text.toString() //新增屏蔽内容
+                val text = binding?.addBanContent?.text.toString() //新增屏蔽内容
                 if (text.isEmpty()) {
                     Toast.makeText(context, "不能为空", Toast.LENGTH_SHORT).show()
                 } else if (banContents.contains(text)) {
@@ -115,21 +116,21 @@ class DanmuBanFragment: Fragment() {
                     isSelectedArray.add(text)
                     saveBanInfo(banContents, isSelectedArray)
                     val chip = createNewChip(text, true)
-                    ban_chipGroup.addView(chip)
-                    add_ban_content.setText("")
-                    add_ban_TextField.clearFocus()
+                    binding?.banChipGroup?.addView(chip)
+                    binding?.addBanContent?.setText("")
+                    binding?.addBanTextField?.clearFocus()
                 }
             }
         }
-        SunnyWeatherApplication.isLogin.observe(viewLifecycleOwner, { result ->
+        SunnyWeatherApplication.isLogin.observe(viewLifecycleOwner) { result ->
             if (!loadedBan && result) {
-                active_ban.visibility = View.VISIBLE
-                active_ban_txt.visibility = View.GONE
+                binding?.activeBan?.visibility = View.VISIBLE
+                binding?.activeBanTxt?.visibility = View.GONE
                 val isActive = SunnyWeatherApplication.userInfo!!.isActived == "1"
                 val context = context as LiveRoomActivity
-                active_ban.isChecked = isActive
+                binding?.activeBan?.isChecked = isActive
                 context.changeBanActive(isActive)
-                active_ban.setOnCheckedChangeListener { buttonView, isChecked ->
+                binding?.activeBan?.setOnCheckedChangeListener { buttonView, isChecked ->
                     if (SunnyWeatherApplication.isLogin!!.value!!) {
                         saveBanActive(isChecked)
                         context.changeBanActive(isChecked)
@@ -144,14 +145,14 @@ class DanmuBanFragment: Fragment() {
                 }
                 val banContentsString = SunnyWeatherApplication.userInfo!!.allContent
                 val isSelectString = SunnyWeatherApplication.userInfo!!.selectedContent
-                if (banContentsString != ""){
-                    if (banContentsString.contains(";")){
+                if (banContentsString != "") {
+                    if (banContentsString.contains(";")) {
                         banContents = banContentsString.split(";") as ArrayList<String>
                     } else {
                         banContents.add(banContentsString)
                     }
                 }
-                if (isSelectString != ""){
+                if (isSelectString != "") {
                     if (isSelectString.contains(";")) {
                         isSelectedArray = isSelectString.split(";") as ArrayList<String>
                     } else {
@@ -161,8 +162,8 @@ class DanmuBanFragment: Fragment() {
                 }
                 addClips()
             }
-        })
-        viewModel.updateUserInfoLiveDate.observe(viewLifecycleOwner, { result ->
+        }
+        viewModel.updateUserInfoLiveDate.observe(viewLifecycleOwner) { result ->
             val temp = result.getOrNull()
             if (temp is UserInfo) {
                 SunnyWeatherApplication.userInfo = temp
@@ -171,7 +172,7 @@ class DanmuBanFragment: Fragment() {
             } else {
                 Toast.makeText(context, temp.toString(), Toast.LENGTH_SHORT).show()
             }
-        })
+        }
     }
 
     override fun onPause() {
@@ -184,7 +185,7 @@ class DanmuBanFragment: Fragment() {
         loadedBan = true
         for (banContent in banContents) {
             val chip = createNewChip(banContent, isSelectedArray.contains(banContent))
-            ban_chipGroup.addView(chip)
+            binding?.banChipGroup?.addView(chip)
         }
     }
 
@@ -201,7 +202,7 @@ class DanmuBanFragment: Fragment() {
             if (chip.isChecked) {
                 isSelectedArray.remove(banContent)
             }
-            ban_chipGroup.removeView(chip)
+            binding?.banChipGroup?.removeView(chip)
             saveBanInfo(banContents, isSelectedArray)
         }
         //选中事件

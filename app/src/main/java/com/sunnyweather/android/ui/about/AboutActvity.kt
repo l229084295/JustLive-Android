@@ -3,22 +3,23 @@ package com.sunnyweather.android.ui.about
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import com.blankj.utilcode.util.AppUtils
 import com.blankj.utilcode.util.BarUtils
 import com.blankj.utilcode.util.ToastUtils
-import com.sunnyweather.android.R
 import com.sunnyweather.android.SunnyWeatherApplication
-import kotlinx.android.synthetic.main.activity_about.*
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.activity_main.main_container
+import com.sunnyweather.android.R
+import com.sunnyweather.android.databinding.ActivityAboutBinding
 import java.lang.Exception
 
 class AboutActvity: AppCompatActivity(){
+
+    lateinit var binding: ActivityAboutBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = ActivityAboutBinding.inflate(layoutInflater)
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         var themeActived: Int
         val autoDark = sharedPreferences.getBoolean("autoDark", true)
@@ -39,44 +40,46 @@ class AboutActvity: AppCompatActivity(){
         } else {
             setTheme(themeActived)
         }
-        setContentView(R.layout.activity_about)
-        BarUtils.transparentStatusBar(this)
-        BarUtils.addMarginTopEqualStatusBarHeight(about_back)
-        BarUtils.setStatusBarLightMode(this, themeActived != R.style.nightTheme)
+        setContentView(binding.root)
+        binding.apply {
+            BarUtils.transparentStatusBar(this@AboutActvity)
+            BarUtils.addMarginTopEqualStatusBarHeight(aboutAbout)
+            BarUtils.setStatusBarLightMode(this@AboutActvity, themeActived != R.style.nightTheme)
 
-        about_version.text = "版本号:" + AppUtils.getAppVersionName()
+            aboutVersion.text = "版本号:" + AppUtils.getAppVersionName()
 
-        about_pic.setImageDrawable(AppUtils.getAppIcon())
+            aboutPic.setImageDrawable(AppUtils.getAppIcon())
 
-        about_kuan.setOnClickListener {
-            try {
-                val intent = Intent()
-                intent.setClassName("com.coolapk.market", "com.coolapk.market.view.AppLinkActivity");
-                intent.action = "android.intent.action.VIEW";
-                intent.data = Uri.parse("coolmarket://u/645623")
-                startActivity(intent)
-            } catch (e:Exception) {
-                ToastUtils.showShort("启动失败")
+            aboutKuan.setOnClickListener {
+                try {
+                    val intent = Intent()
+                    intent.setClassName("com.coolapk.market", "com.coolapk.market.view.AppLinkActivity");
+                    intent.action = "android.intent.action.VIEW";
+                    intent.data = Uri.parse("coolmarket://u/645623")
+                    startActivity(intent)
+                } catch (e:Exception) {
+                    ToastUtils.showShort("启动失败")
+                }
             }
-        }
-        about_weibo.setOnClickListener {
-            var intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://weibo.com/u/5211151565"))
-            startActivity(intent)
-        }
-        about_qq.setOnClickListener {
-            var intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://qm.qq.com/cgi-bin/qm/qr?k=_2KootdkU0ikLiFhBCQMJKW7PjHzySZ8&authKey=2dGp04G04G/+a1KHiIjqjpg1Se+/TgpQ5yzpEbMkzP9Y6lkrFdReKdtBtg6xC+Cs&noverify=0"))
-            this.startActivity(intent)
-        }
-        about_github.setOnClickListener {
-            var intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/guyijie1211"))
-            this.startActivity(intent)
-        }
-        about_web.setOnClickListener {
-            var intent = Intent(Intent.ACTION_VIEW, Uri.parse("http://live.yj1211.work"))
-            this.startActivity(intent)
-        }
-        about_back.setOnClickListener {
-            this.onBackPressed()
+            aboutWeibo.setOnClickListener {
+                var intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://weibo.com/u/5211151565"))
+                startActivity(intent)
+            }
+            aboutQq.setOnClickListener {
+                var intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://qm.qq.com/cgi-bin/qm/qr?k=_2KootdkU0ikLiFhBCQMJKW7PjHzySZ8&authKey=2dGp04G04G/+a1KHiIjqjpg1Se+/TgpQ5yzpEbMkzP9Y6lkrFdReKdtBtg6xC+Cs&noverify=0"))
+                this@AboutActvity.startActivity(intent)
+            }
+            aboutGithub.setOnClickListener {
+                var intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/guyijie1211"))
+                this@AboutActvity.startActivity(intent)
+            }
+            aboutWeb.setOnClickListener {
+                var intent = Intent(Intent.ACTION_VIEW, Uri.parse("http://live.yj1211.work"))
+                this@AboutActvity.startActivity(intent)
+            }
+            aboutBack.setOnClickListener {
+                this@AboutActvity.onBackPressed()
+            }
         }
     }
 }

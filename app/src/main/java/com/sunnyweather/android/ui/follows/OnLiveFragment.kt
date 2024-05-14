@@ -13,23 +13,25 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.blankj.utilcode.util.ConvertUtils
 import com.blankj.utilcode.util.ScreenUtils
 import com.scwang.smart.refresh.header.ClassicsHeader
-import com.sunnyweather.android.R
 import com.sunnyweather.android.SunnyWeatherApplication
 import com.sunnyweather.android.logic.model.RoomInfo
 import com.sunnyweather.android.ui.roomList.RoomListAdapter
 import com.sunnyweather.android.ui.roomList.SpaceItemDecoration
-import kotlinx.android.synthetic.main.fragment_roomlist.*
+import com.sunnyweather.android.R
+import com.sunnyweather.android.databinding.FragmentRoomlistBinding
 
 class OnLiveFragment(private val isLive: Boolean) : Fragment() {
     constructor() : this(true)
     private val viewModel by lazy { ViewModelProvider(this).get(FollowViewModel::class.java) }
     private lateinit var adapterOn: RoomListAdapter
+    var binding: FragmentRoomlistBinding? = null
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_roomlist, container, false)
+        binding = FragmentRoomlistBinding.inflate(layoutInflater)
+        return binding?.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -40,53 +42,55 @@ class OnLiveFragment(private val isLive: Boolean) : Fragment() {
         var cardNum = ScreenUtils.getAppScreenWidth()/ ConvertUtils.dp2px(195F)
         if (cardNum < 2) cardNum = 2
         val layoutManager = GridLayoutManager(context, cardNum)
-        recyclerView.addItemDecoration(SpaceItemDecoration(10))
-        recyclerView.layoutManager = layoutManager
-        adapterOn = RoomListAdapter(this, viewModel.roomList)
-        recyclerView.adapter = adapterOn
-        //下拉刷新，加载更多
-        refresh_home.setRefreshHeader(ClassicsHeader(context))
-        refresh_home.finishLoadMoreWithNoMoreData()
-        refresh_home.setOnRefreshListener {
-            if (!SunnyWeatherApplication.isLogin.value!!) {
-                refresh_home.finishRefresh() //传入false表示刷新失败
-                refresh_home.finishLoadMoreWithNoMoreData()
-                return@setOnRefreshListener
-            }
-            viewModel.getRoomsOn(SunnyWeatherApplication.userInfo?.uid)
-        }
-
-        SunnyWeatherApplication.isLogin.observe(viewLifecycleOwner) { result ->
-            if (!viewModel.inited && result) {
-                viewModel.inited = true
-                progressBar_roomList.isVisible = true
-                viewModel.clearRoomList()
-                adapterOn.notifyDataSetChanged()
+        binding?.apply {
+            recyclerView.addItemDecoration(SpaceItemDecoration(10))
+            recyclerView.layoutManager = layoutManager
+            adapterOn = RoomListAdapter(this@OnLiveFragment, viewModel.roomList)
+            recyclerView.adapter = adapterOn
+            //下拉刷新，加载更多
+            refreshHome.setRefreshHeader(ClassicsHeader(context))
+            refreshHome.finishLoadMoreWithNoMoreData()
+            refreshHome.setOnRefreshListener {
+                if (!SunnyWeatherApplication.isLogin.value!!) {
+                    refreshHome.finishRefresh() //传入false表示刷新失败
+                    refreshHome.finishLoadMoreWithNoMoreData()
+                    return@setOnRefreshListener
+                }
                 viewModel.getRoomsOn(SunnyWeatherApplication.userInfo?.uid)
-            } else if (!result) {
-                viewModel.inited = false
-                viewModel.clearRoomList()
-                adapterOn.notifyDataSetChanged()
             }
-        }
-        viewModel.userRoomListLiveDate.observe(viewLifecycleOwner) { result ->
-            val rooms = result.getOrNull()
-            if (rooms is ArrayList<*>) {
-                viewModel.clearRoomList()
-                sortRooms(rooms as List<RoomInfo>)
-                adapterOn.notifyDataSetChanged()
-                progressBar_roomList.isGone = true
-                refresh_home.finishRefresh() //传入false表示刷新失败
-                refresh_home.finishLoadMoreWithNoMoreData()
-                (this.parentFragment as FollowsFragment).enableInput()
-            } else if (rooms is String) {
-                Toast.makeText(context, rooms, Toast.LENGTH_SHORT).show()
-                result.exceptionOrNull()?.printStackTrace()
-            }
-        }
 
-        if (SunnyWeatherApplication.isLogin.value!!){
-            progressBar_roomList.isVisible = true
+            SunnyWeatherApplication.isLogin.observe(viewLifecycleOwner) { result ->
+                if (!viewModel.inited && result) {
+                    viewModel.inited = true
+                    progressBarRoomList.isVisible = true
+                    viewModel.clearRoomList()
+                    adapterOn.notifyDataSetChanged()
+                    viewModel.getRoomsOn(SunnyWeatherApplication.userInfo?.uid)
+                } else if (!result) {
+                    viewModel.inited = false
+                    viewModel.clearRoomList()
+                    adapterOn.notifyDataSetChanged()
+                }
+            }
+            viewModel.userRoomListLiveDate.observe(viewLifecycleOwner) { result ->
+                val rooms = result.getOrNull()
+                if (rooms is ArrayList<*>) {
+                    viewModel.clearRoomList()
+                    sortRooms(rooms as List<RoomInfo>)
+                    adapterOn.notifyDataSetChanged()
+                    progressBarRoomList.isGone = true
+                    refreshHome.finishRefresh() //传入false表示刷新失败
+                    refreshHome.finishLoadMoreWithNoMoreData()
+                    (this@OnLiveFragment.parentFragment as FollowsFragment).enableInput()
+                } else if (rooms is String) {
+                    Toast.makeText(context, rooms, Toast.LENGTH_SHORT).show()
+                    result.exceptionOrNull()?.printStackTrace()
+                }
+            }
+
+            if (SunnyWeatherApplication.isLogin.value!!){
+                progressBarRoomList.isVisible = true
+            }
         }
     }
 

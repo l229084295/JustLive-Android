@@ -16,14 +16,11 @@ import com.paulrybitskyi.persistentsearchview.listeners.OnSearchConfirmedListene
 import com.paulrybitskyi.persistentsearchview.listeners.OnSearchQueryChangeListener
 import com.paulrybitskyi.persistentsearchview.listeners.OnSuggestionChangeListener
 import com.paulrybitskyi.persistentsearchview.utils.SuggestionCreationUtil
-import com.sunnyweather.android.R
 import com.sunnyweather.android.logic.model.Owner
 import com.sunnyweather.android.ui.customerUIs.AnimationUtils
 import com.sunnyweather.android.ui.customerUIs.HeaderedRecyclerViewListener
 import com.sunnyweather.android.ui.customerUIs.VerticalSpacingItemDecorator
 import com.sunnyweather.android.ui.roomList.SpaceItemDecoration
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.activity_search.*
 import java.lang.StringBuilder
 import java.util.*
 import kotlin.collections.ArrayList
@@ -34,7 +31,8 @@ import androidx.preference.PreferenceManager
 import com.arlib.floatingsearchview.FloatingSearchView
 import com.blankj.utilcode.util.BarUtils
 import com.sunnyweather.android.SunnyWeatherApplication
-import kotlinx.android.synthetic.main.activity_setting.*
+import com.sunnyweather.android.R
+import com.sunnyweather.android.databinding.ActivitySearchBinding
 import java.lang.Exception
 import java.lang.reflect.Method
 
@@ -43,8 +41,10 @@ class SearchActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var historySearchList: ArrayList<String>
     private val viewModel by lazy { ViewModelProvider(this).get(SearchViewModel::class.java) }
     private lateinit var searchAdapter: SearchAdapter
+    lateinit var binding: ActivitySearchBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = ActivitySearchBinding.inflate(layoutInflater)
         //颜色主题
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         var themeActived: Int
@@ -66,7 +66,7 @@ class SearchActivity : AppCompatActivity(), View.OnClickListener {
         } else {
             setTheme(themeActived)
         }
-        setContentView(R.layout.activity_search)
+        setContentView(binding.root)
         BarUtils.transparentStatusBar(this)
         if (themeActived != R.style.nightTheme) {
             BarUtils.setStatusBarLightMode(this, true)
@@ -74,16 +74,16 @@ class SearchActivity : AppCompatActivity(), View.OnClickListener {
             BarUtils.setStatusBarLightMode(this, false)
         }
         init()
-        recyclerView_search.addItemDecoration(SpaceItemDecoration(10))
+        binding.recyclerViewSearch.addItemDecoration(SpaceItemDecoration(10))
         searchAdapter = SearchAdapter(this, viewModel.ownersList as List<Owner>)
-        recyclerView_search.adapter = searchAdapter
-        viewModel.ownerListLiveData.observe(this, {result ->
+        binding.recyclerViewSearch.adapter = searchAdapter
+        viewModel.ownerListLiveData.observe(this) { result ->
             val rooms = result.getOrNull()
             if (rooms is ArrayList<*>) {
                 viewModel.ownersList.addAll(rooms as Collection<Owner>)
                 searchAdapter.notifyDataSetChanged()
-                progressBar.isGone = true
-                recyclerView_search.animate()
+                binding.progressBar.isGone = true
+                binding.recyclerViewSearch.animate()
                     .alpha(1f)
                     .setInterpolator(LinearInterpolator())
                     .setDuration(300L)
@@ -92,7 +92,7 @@ class SearchActivity : AppCompatActivity(), View.OnClickListener {
                 Toast.makeText(this, rooms, Toast.LENGTH_SHORT).show()
                 result.exceptionOrNull()?.printStackTrace()
             }
-        })
+        }
         intent.getStringExtra("query")?.also { query ->
             SunnyWeatherApplication.userInfo?.uid?.let { viewModel.search("all", query, it) }
         }
@@ -112,11 +112,11 @@ class SearchActivity : AppCompatActivity(), View.OnClickListener {
 
         initProgressBar()
         initSearchView()
-        emptyViewLl.isVisible = viewModel.ownersList.isEmpty()
+        binding.emptyViewLl.isVisible = viewModel.ownersList.isEmpty()
         initRecyclerView()
     }
 
-    private fun initRecyclerView() = with(recyclerView_search) {
+    private fun initRecyclerView() = with(binding.recyclerViewSearch) {
         layoutManager = LinearLayoutManager(context)
 
         addItemDecoration(initVerticalSpacingItemDecorator())
@@ -127,11 +127,11 @@ class SearchActivity : AppCompatActivity(), View.OnClickListener {
         return object : HeaderedRecyclerViewListener(this@SearchActivity) {
 
             override fun showHeader() {
-                AnimationUtils.showHeader(persistentSearchView)
+                AnimationUtils.showHeader(binding.persistentSearchView)
             }
 
             override fun hideHeader() {
-                AnimationUtils.hideHeader(persistentSearchView)
+                AnimationUtils.hideHeader(binding.persistentSearchView)
             }
 
         }
@@ -145,10 +145,10 @@ class SearchActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun initProgressBar() {
-        progressBar.isGone = true
+        binding.progressBar.isGone = true
     }
 
-    private fun initSearchView() = with(persistentSearchView) {
+    private fun initSearchView() = with(binding.persistentSearchView) {
         setOnLeftBtnClickListener(this@SearchActivity)
         setOnClearInputBtnClickListener(this@SearchActivity)
         setOnSearchConfirmedListener(mOnSearchConfirmedListener) //提交搜索监听
@@ -214,7 +214,7 @@ class SearchActivity : AppCompatActivity(), View.OnClickListener {
     //设置搜索结果
     private fun setSuggestions(queries: List<String>, expandIfNecessary: Boolean) {
         val suggestions: List<SuggestionItem> = SuggestionCreationUtil.asRecentSearchSuggestions(queries)
-        persistentSearchView.setSuggestions(suggestions, expandIfNecessary)
+        binding.persistentSearchView.setSuggestions(suggestions, expandIfNecessary)
     }
 
     private val mOnSearchConfirmedListener = OnSearchConfirmedListener { searchView, query ->
@@ -224,12 +224,12 @@ class SearchActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun performSearch(query: String) {
-        emptyViewLl.isGone = true
-        recyclerView_search.alpha = 0f
-        progressBar.isVisible = true
+        binding.emptyViewLl.isGone = true
+        binding.recyclerViewSearch.alpha = 0f
+        binding.progressBar.isVisible = true
         viewModel.clearList()
-        persistentSearchView.hideProgressBar(false)
-        persistentSearchView.showLeftButton()
+        binding.persistentSearchView.hideProgressBar(false)
+        binding.persistentSearchView.showLeftButton()
         SunnyWeatherApplication.userInfo?.uid?.let { viewModel.search("all", query, it) }
     }
 
@@ -280,16 +280,16 @@ class SearchActivity : AppCompatActivity(), View.OnClickListener {
     override fun onResume() {
         super.onResume()
 
-        val searchQueries = if(persistentSearchView.isInputQueryEmpty) {
+        val searchQueries = if(binding.persistentSearchView.isInputQueryEmpty) {
             getInitialSearchQueries()
         } else {
-            getSuggestionsForQuery(persistentSearchView.inputQuery)
+            getSuggestionsForQuery(binding.persistentSearchView.inputQuery)
         }
 
         setSuggestions(searchQueries, false)
 
         if(shouldExpandSearchView()) {
-            persistentSearchView.expand(false)
+            binding.persistentSearchView.expand(false)
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE or WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
         } else {
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN or WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
@@ -298,8 +298,8 @@ class SearchActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun shouldExpandSearchView(): Boolean {
         return (
-            (persistentSearchView.isInputQueryEmpty && (viewModel.ownersList.isEmpty())) ||
-                    persistentSearchView.isExpanded
+            (binding.persistentSearchView.isInputQueryEmpty && (viewModel.ownersList.isEmpty())) ||
+                    binding.persistentSearchView.isExpanded
         )
     }
 

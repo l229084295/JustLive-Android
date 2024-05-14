@@ -1,8 +1,8 @@
 package com.sunnyweather.android.ui.follows
 
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.switchMap
 import com.sunnyweather.android.logic.Repository
 import com.sunnyweather.android.logic.model.RoomInfo
 
@@ -12,7 +12,7 @@ class FollowViewModel : ViewModel(){
     var inited = false
     var isLive: Boolean = false
 
-    val userRoomListLiveDate = Transformations.switchMap(uidLiveData) {
+    val userRoomListLiveDate = uidLiveData.switchMap {
             uid -> Repository.getRoomsOn(uid)
     }
 

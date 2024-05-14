@@ -5,32 +5,28 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import com.sunnyweather.android.R
 import com.sunnyweather.android.SunnyWeatherApplication
 import com.sunnyweather.android.SunnyWeatherApplication.Companion.context
 import com.sunnyweather.android.logic.model.UserInfo
-import kotlinx.android.synthetic.main.activity_login.*
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
-import android.os.Build
-import android.util.Log
-import android.view.View
-import android.view.Window
-import android.view.WindowManager
 import android.widget.TextView
 import androidx.core.widget.doOnTextChanged
 import androidx.preference.PreferenceManager
 import com.blankj.utilcode.util.BarUtils
 import com.google.android.material.textfield.TextInputLayout
 import com.umeng.analytics.MobclickAgent
+import com.sunnyweather.android.R
+import com.sunnyweather.android.databinding.ActivityLoginBinding
 
 class LoginActivity: AppCompatActivity() {
     private val viewModel by lazy { ViewModelProvider(this).get(LoginViewModel::class.java) }
+    lateinit var binding: ActivityLoginBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = ActivityLoginBinding.inflate(layoutInflater)
         //颜色主题
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         var theme: Int
@@ -52,14 +48,14 @@ class LoginActivity: AppCompatActivity() {
         } else {
             setTheme(theme)
         }
-        setContentView(R.layout.activity_login)
+        setContentView(binding.root)
         if (theme != R.style.nightTheme) {
             BarUtils.setStatusBarLightMode(this, true)
         } else {
             BarUtils.setStatusBarLightMode(this, false)
         }
         BarUtils.transparentStatusBar(this)
-        viewModel.loginResponseLiveDate.observe(this, { result ->
+        viewModel.loginResponseLiveDate.observe(this) { result ->
             val userInfo = result.getOrNull()
             if (userInfo is UserInfo) {
                 MobclickAgent.onProfileSignIn(userInfo.userName)//友盟账号登录
@@ -69,7 +65,7 @@ class LoginActivity: AppCompatActivity() {
                 SunnyWeatherApplication.saveLoginInfo(
                     this,
                     userInfo.userName,
-                    SunnyWeatherApplication.encodeMD5(password_content.text.toString())
+                    SunnyWeatherApplication.encodeMD5(binding.passwordContent.text.toString())
                 )
                 Toast.makeText(this, "登录成功", Toast.LENGTH_SHORT).show()
                 onBackPressed()
@@ -78,38 +74,38 @@ class LoginActivity: AppCompatActivity() {
                 Toast.makeText(this, userInfo, Toast.LENGTH_SHORT).show()
                 result.exceptionOrNull()?.printStackTrace()
             }
-        })
+        }
         //用户名校验
-        userName_content.doOnTextChanged { text, _, _, _ ->
+        binding.userNameContent.doOnTextChanged { text, _, _, _ ->
             if (text!!.isNotEmpty()) {
-                username_text.error = null
+                binding.usernameText.error = null
             }
         }
         //密码框校验
-        password_content.doOnTextChanged { text, _, _, _ ->
+        binding.passwordContent.doOnTextChanged { text, _, _, _ ->
             if (text!!.isNotEmpty()) {
-                password_text.error = null
+                binding.passwordText.error = null
             }
         }
         //登录按钮事件
-        loginBtn.setOnClickListener {
+        binding.loginBtn.setOnClickListener {
             hideInput(this)
             if (checkAll()) {
-                val userName = userName_content.text.toString()
-                val password = SunnyWeatherApplication.encodeMD5(password_content.text.toString())
+                val userName = binding.userNameContent.text.toString()
+                val password = SunnyWeatherApplication.encodeMD5(binding.passwordContent.text.toString())
                 viewModel.doLogin(userName, password)
             }
         }
         //注册按钮事件
-        textButton.setOnClickListener {
+        binding.textButton.setOnClickListener {
             val intent = Intent(context, RegisterActivity::class.java)
             startActivity(intent)
         }
     }
     //提交注册前检验各个输入框是否正确
     private fun checkAll(): Boolean{
-        if (!checkIfCorrect(username_text, userName_content)) return false
-        if (!checkIfCorrect(password_text, password_content)) return false
+        if (!checkIfCorrect(binding.usernameText, binding.userNameContent)) return false
+        if (!checkIfCorrect(binding.passwordText, binding.passwordContent)) return false
         return true
     }
     //判断是否正确
